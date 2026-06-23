@@ -1,0 +1,16 @@
+name: Test slurm setup action
+
+on:
+    workflow_dispatch:
+
+jobs:
+    test-simple:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - name: Test Slurm setup action
+              uses: ./
+            - name: Verify Slurm installation
+              shell: bash
+              run: |
+                sinfo -V

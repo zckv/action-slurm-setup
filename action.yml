@@ -1,0 +1,19 @@
+name: 'Setup Slurm'
+description: 'Set up a slurm environment'
+
+inputs:
+  slurm_version:
+    description: Slurm version to install
+    default: 25.05.8
+    type: string
+
+runs:
+  using: "composite"
+  env:
+    GH_TOKEN: ${{ github.token }}
+  steps:
+    - name: Install correct slurm version for os
+      shell: bash
+      run: |
+        gh release download slurm-${{ inputs.slurm_version }} --pattern "*ubuntu-24.04"
+        ls -la

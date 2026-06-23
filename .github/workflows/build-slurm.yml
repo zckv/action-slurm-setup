@@ -1,0 +1,50 @@
+---
+name: Build Ubuntu packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      slurm_version:
+        description: Slurm version to build
+        default: 25.05.8
+        type: string
+      ubuntu_version:
+        description: Ubuntu version to build on
+        default: ubuntu-latest
+        type: string
+
+jobs:
+  build:
+    runs-on: ${{ inputs.ubuntu_version }}
+    name: "Build slurm deb packages"
+    permissions:
+      contents: write
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential fakeroot devscripts equivs wget
+      - name: Download slurm release
+        run: |
+          SLURM_VERSION="${{ inputs.slurm_version }}"
+          wget "https://github.com/SchedMD/slurm/releases/download/slurm-${SLURM_VERSION//./-}-1/slurm-${SLURM_VERSION}.tar.bz2" 
+          tar -xaf slurm-${SLURM_VERSION}.tar.bz2
+          cd slurm-${SLURM_VERSION}
+          sudo mk-build-deps -i -t "apt-get --yes" debian/control
+          debuild -b -uc -us
+          cd ..
+      - name: Archive packages
+        run: |
+          tar -czvf slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz *.deb
+
+      - name: Upload as artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}
+          path: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz
+          retention-days: 1
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: slurm-${{ inputs.slurm_version }}
+          files: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz
