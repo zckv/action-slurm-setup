@@ -40,10 +40,10 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: ${{ inputs.ubuntu_version }}
-          path: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz
+          path: ${{ inputs.ubuntu_version }}.tar.gz
           retention-days: 1
       - name: Release
-        uses: softprops/action-gh-release@v3
+        uses: zckv/action-update-release@v1
         with:
-          tag_name: slurm-${{ inputs.slurm_version }}
-          files: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz
+          tag: slurm-${{ inputs.slurm_version }}
+          files: ${{ inputs.ubuntu_version }}.tar.gz
