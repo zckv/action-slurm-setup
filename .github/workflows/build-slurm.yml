@@ -35,16 +35,15 @@ jobs:
           cd ..
       - name: Archive packages
         run: |
-          tar -czvf slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz *.deb
-
+          tar -czvf ${{ inputs.ubuntu_version }}.tar.gz *.deb
       - name: Upload as artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}
+          name: ${{ inputs.ubuntu_version }}
           path: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz
           retention-days: 1
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: slurm-${{ inputs.slurm_version }}
           files: slurm-${{ inputs.slurm_version }}-${{ inputs.ubuntu_version }}.tar.gz
