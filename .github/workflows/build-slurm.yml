@@ -34,16 +34,20 @@ jobs:
           debuild -b -uc -us
           cd ..
       - name: Archive packages
+        id: tar
         run: |
-          tar -czvf ${{ inputs.ubuntu_version }}.tar.gz *.deb
+          # Add grep on ID ? (?<=ID=)[a-z]*$
+          UBUNTU_VERSION="ubuntu-$(grep -oP '(?<=VERSION_ID=\")[0-9]{2}\.[0-9]+' /etc/os-release)"
+          tar -czvf "${UBUNTU_VERSION}.tar.gz" *.deb
+          echo "ubuntu_version=${UBUNTU_VERSION}" >> $GITHUB_OUTPUT
       - name: Upload as artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ inputs.ubuntu_version }}
-          path: ${{ inputs.ubuntu_version }}.tar.gz
+          name: ${{ steps.tar.outputs.ubuntu_version }}
+          path: ${{ steps.tar.outputs.ubuntu_version }}.tar.gz
           retention-days: 1
       - name: Release
         uses: zckv/action-update-release@v1
         with:
           tag: slurm-${{ inputs.slurm_version }}
-          files: ${{ inputs.ubuntu_version }}.tar.gz
+          files: ${{ steps.tar.outputs.ubuntu_version }}.tar.gz
